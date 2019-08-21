@@ -37,7 +37,7 @@ public:
 
   bool sample(std::vector<FloatType>& solution_set) override;
 
-  void addCallback(std::function<void(const std::vector<FloatType>&)> cb);
+  void addCallback(std::function<void(const std::vector<FloatType>&, const bool&)> cb);
 
 private:
   bool isCollisionFree(const FloatType* vertex);
@@ -49,7 +49,7 @@ private:
   FloatType radial_sample_res_;
   bool allow_collision_;
 
-  std::vector<std::function<void(const std::vector<FloatType>&)>> callbacks_;
+  std::vector<std::function<void(const std::vector<FloatType>&, const bool&)>> callbacks_;
 };
 
 using AxialSymmetricSamplerF = AxialSymmetricSampler<float>;

@@ -55,10 +55,9 @@ bool AxialSymmetricSampler<FloatType>::sample(std::vector<FloatType>& solution_s
     {
       const auto* sol_data = buffer.data() + i * opw_dof;
 
-      for(auto cb : callbacks_)
-        cb(std::vector<FloatType>(sol_data, sol_data + opw_dof));
+      bool collision_free = isCollisionFree(sol_data);
 
-      if (isCollisionFree(sol_data))
+      if (collision_free)
         solution_set.insert(end(solution_set), sol_data, sol_data + opw_dof);
 #ifndef NDEBUG
       else
@@ -66,6 +65,9 @@ bool AxialSymmetricSampler<FloatType>::sample(std::vector<FloatType>& solution_s
         kin_->analyzeIK(p);
       }
 #endif
+
+      for(auto cb : callbacks_)
+        cb(std::vector<FloatType>(sol_data, sol_data + opw_dof), collision_free);
     }
     buffer.clear();
 
@@ -79,7 +81,7 @@ bool AxialSymmetricSampler<FloatType>::sample(std::vector<FloatType>& solution_s
 }
 
 template <typename FloatType>
-void AxialSymmetricSampler<FloatType>::addCallback(std::function<void(const std::vector<FloatType>&)> cb)
+void AxialSymmetricSampler<FloatType>::addCallback(std::function<void(const std::vector<FloatType>&, const bool&)> cb)
 {
   callbacks_.push_back(cb);
 }
