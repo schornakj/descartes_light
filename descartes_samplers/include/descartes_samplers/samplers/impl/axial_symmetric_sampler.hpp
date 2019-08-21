@@ -54,8 +54,18 @@ bool AxialSymmetricSampler<FloatType>::sample(std::vector<FloatType>& solution_s
     for (std::size_t i = 0; i < n_sols; ++i)
     {
       const auto* sol_data = buffer.data() + i * opw_dof;
+
+      for(auto cb : callbacks_)
+        cb(std::vector<FloatType>(sol_data, sol_data + opw_dof));
+
       if (isCollisionFree(sol_data))
         solution_set.insert(end(solution_set), sol_data, sol_data + opw_dof);
+#ifndef NDEBUG
+      else
+      {
+        kin_->analyzeIK(p);
+      }
+#endif
     }
     buffer.clear();
 
@@ -67,6 +77,13 @@ bool AxialSymmetricSampler<FloatType>::sample(std::vector<FloatType>& solution_s
 
   return !solution_set.empty();
 }
+
+template <typename FloatType>
+void AxialSymmetricSampler<FloatType>::addCallback(std::function<void(const std::vector<FloatType>&)> cb)
+{
+  callbacks_.push_back(cb);
+}
+
 
 template <typename FloatType>
 bool AxialSymmetricSampler<FloatType>::isCollisionFree(const FloatType* vertex)
